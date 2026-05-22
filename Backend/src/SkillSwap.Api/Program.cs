@@ -22,20 +22,27 @@ builder.Services.AddScoped<ISkillSwapDbContext>(provider =>
 // 2. Add spatial services
 builder.Services.AddScoped<IGeoSearchService, PostGisGeoSearchService>();
 
-// 3. Register MediatR from Application layer
+// 3. Register MediatR from Application and Api layers
 builder.Services.AddMediatR(cfg => 
-    cfg.RegisterServicesFromAssembly(typeof(SkillSwap.Application.Class1).Assembly));
+{
+    cfg.RegisterServicesFromAssembly(typeof(SkillSwap.Application.Class1).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
 
-// 4. Add CORS for Frontend
+// 4. Add CORS for Frontend with credential support (needed for SignalR)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins("http://localhost:5173", "https://porsev.space")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
+
+// 4.5. Add SignalR services
+builder.Services.AddSignalR();
 
 // 5. Add OpenAPI support
 builder.Services.AddOpenApi();
@@ -78,10 +85,20 @@ app.MapPost("/api/tasks", async (
     IMediator mediator, 
     CancellationToken cancellationToken) =>
 {
-    var result = await mediator.Send(command, cancellationToken);
-    return Results.Ok(result);
+    try
+    {
+        var result = await mediator.Send(command, cancellationToken);
+        return Results.Ok(result);
+    }
+    catch (SkillSwap.Application.Common.Exceptions.SpatialVelocityAnomalyException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message, code = "VelocityAnomaly" });
+    }
 })
 .WithName("CreateTask")
 .WithOpenApi();
+
+// 9. Map SignalR Hub
+app.MapHub<SkillSwap.Api.Hubs.TaskHub>("/hubs/tasks");
 
 app.Run();

@@ -227,7 +227,7 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({ selectedCoords, 
 
       {createTaskMutation.isError && (
         <div className="text-[10px] font-black text-rose-500 uppercase tracking-widest text-center mt-2 animate-shake">
-          Ошибка свитка: {createTaskMutation.error.message}
+          Ошибка свитка: {(createTaskMutation.error as any)?.response?.data?.error || createTaskMutation.error.message}
         </div>
       )}
     </form>

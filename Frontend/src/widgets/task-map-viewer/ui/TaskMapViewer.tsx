@@ -261,14 +261,6 @@ export const TaskMapViewer: React.FC<TaskMapViewerProps> = ({
           <p className="text-sm font-medium text-slate-700 dark:text-slate-300 max-w-sm">{error}</p>
         </div>
       )}
-
-      {/* Инструкция на карте */}
-      {!loading && !error && (
-        <div className="absolute bottom-4 left-4 right-4 md:right-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2 pointer-events-none transition-all duration-300 group-hover:translate-y-0 translate-y-1">
-          <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-          <span>Кликните на карту, чтобы установить место публикации новой задачи.</span>
-        </div>
-      )}
     </div>
   );
 };
